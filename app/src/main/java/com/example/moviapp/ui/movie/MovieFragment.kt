@@ -10,6 +10,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import com.example.moviapp.R
 import com.example.moviapp.core.Resource
+import com.example.moviapp.data.local.AppDatabase
+import com.example.moviapp.data.local.LocalMovieDataSource
 import com.example.moviapp.data.remote.RemoteMovieDataSource
 import com.example.moviapp.databinding.FragmentMovieBinding
 import com.example.moviapp.presentation.MovieViewModel
@@ -24,9 +26,8 @@ class MovieFragment : Fragment(R.layout.fragment_movie) {
     private val viewModel by viewModels<MovieViewModel> {
         MovieViewModelFactory(
             MovieRepositoryImpl(
-                RemoteMovieDataSource(
-                    RetrofitClient.webservice
-                )
+                RemoteMovieDataSource(RetrofitClient.webservice),
+                LocalMovieDataSource(AppDatabase.getDatabase(requireContext()).movieDao())
             )
         )
     }
@@ -36,17 +37,17 @@ class MovieFragment : Fragment(R.layout.fragment_movie) {
 
         binding = FragmentMovieBinding.bind(view)
 
-        viewModel.fetchMainScreenMovies().observe(viewLifecycleOwner, Observer { result->
-            when(result){
-                is Resource.Loading->{
-                    Log.d("LiveData","Loading...")
+        viewModel.fetchMainScreenMovies().observe(viewLifecycleOwner, Observer { result ->
+            when (result) {
+                is Resource.Loading -> {
+                    Log.d("LiveData", "Loading...")
                 }
-                is Resource.Success->{
-                    Log.d("LiveData","${result.data.first}")
+                is Resource.Success -> {
+                    Log.d("LiveData", "${result.data.first}")
 
                 }
-                is Resource.Failure->{
-                    Log.d("Error","${result.exception}")
+                is Resource.Failure -> {
+                    Log.d("Error", "${result.exception}")
 
                 }
             }
